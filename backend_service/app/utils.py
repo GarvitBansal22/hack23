@@ -28,6 +28,9 @@ async def parse_invoice_and_send_email(file, vendor_name, mode, db):
     if vendor_name == "gupshup" and mode == "whatsapp":
         account_numbers, month = get_account_numbers_and_month_from_invoice(file.file)
         await send_email(f"Gupshup account numbers: {month}", prepare_email_content(account_numbers, month))
+    else:
+        # call method to save to db
+        counts = calculate_invoice_counts(file.file)
 
     return invoice
 
@@ -116,3 +119,36 @@ def calculate_excel_counts(base_path: str, file_names: list):
         count_of_communication += df['NUMBER MESSAGES'].sum()
         del df
     return count_of_communication
+
+
+def calculate_invoice_counts(invoice_pdf_file):
+    pdf_reader = PyPDF2.PdfReader(invoice_pdf_file)
+
+    number_of_pages = len(pdf_reader.pages)
+    count_of_transactions = list()
+
+    for i in range(number_of_pages - 1):
+        page_obj = pdf_reader.pages[i]
+        page_text = page_obj.extract_text()
+        page_text = page_text.split("\n")
+
+        index_account_key = -1
+        for index_text, text in enumerate(page_text):
+            text = text.strip().lower()
+            if re.search("^account.*$", text):
+                index_account_key = index_text
+                break
+
+        page_text = page_text[index_account_key:]
+        flag = 0
+        for text in page_text:
+            text = text.strip().lower()
+            if flag == 1:
+                break
+            if not text[0].isalpha():
+                count_of_transactions.append(text.strip().split()[3])
+            elif 'taxable amount' in text:
+                flag = 1
+
+    print(count_of_transactions)
+    return count_of_transactions
