@@ -1,0 +1,66 @@
+import PyPDF2
+import re
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import aiosmtplib
+
+from backend_service.app.settings import SMTP_PORT, SMTP_SERVER
+from backend_service.app.constants import EMAIL_CONTENT, TABLE_ROW_CONTENT
+
+
+async def parse_invoice_and_send_email(pdf_file_obj):
+    account_numbers = get_account_numbers_from_invoice(pdf_file_obj)
+    await send_email("Gupshup account numbers 9", prepare_email_content(account_numbers))
+
+
+def prepare_email_content(account_numbers):
+    table_rows = "".join([TABLE_ROW_CONTENT.format(account_number=account_number) for account_number in account_numbers])
+    return EMAIL_CONTENT.format(month="Temp", table_rows=table_rows)
+
+
+def get_account_numbers_from_invoice(pdf_file_obj):
+    pdf_reader = PyPDF2.PdfReader(pdf_file_obj)
+
+    number_of_pages = len(pdf_reader.pages)
+
+    account_numbers = list()
+
+    for i in range(number_of_pages-1):
+        page_obj = pdf_reader.pages[i]
+        page_text = page_obj.extract_text()
+        page_text = page_text.split("\n")
+
+        index_account_key = -1
+        for index_text, text in enumerate(page_text):
+            text = text.strip().lower()
+            if re.search("^account.*$", text):
+                index_account_key = index_text
+                break
+        # print(f"Index for account keyword is {index_account_key} for page number {i}")
+
+        page_text = page_text[index_account_key:]
+
+        flag = 0
+        for text in page_text:
+            text = text.strip().lower()
+            if flag == 1:
+                break
+            if not text[0].isalpha():
+                account_numbers.append(text.strip().split()[0])
+            elif 'taxable amount' in text:
+                flag = 1
+
+        # print(pageText)
+    account_numbers = list(set(account_numbers))
+    return account_numbers
+
+
+async def send_email(subject, content):
+    message = MIMEMultipart("alternative")
+    message["From"] = "sender@example.com"
+    message["To"] = "receiver@example.com"
+    message["Subject"] = subject
+    part1 = MIMEText(content, "html")
+    message.attach(part1)
+
+    await aiosmtplib.send(message, hostname=SMTP_SERVER, port=SMTP_PORT)
