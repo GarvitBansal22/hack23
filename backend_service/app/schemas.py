@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+import uuid
 
 
 class InvoiceBase(BaseModel):
@@ -21,3 +22,21 @@ class Invoice(InvoiceBase):
 
 class VendorDistinct(BaseModel):
     vendor_name: str
+
+
+class MonthlyCounts(BaseModel):
+    company_id: uuid.UUID
+    vendor: str
+    month_year_string: str
+    message_count_monthly: int
+
+
+class InvoicesCountsBase(BaseModel):
+    approver_stage: str
+    vendor_name: str
+    count_db: int
+    count_vendor: int
+
+
+class InvoicesCountsCreate(InvoicesCountsBase):
+    pass

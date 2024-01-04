@@ -19,3 +19,15 @@ def create_user_item(db: Session, item: schemas.InvoiceCreate):
 
 def get_vendors(db: Session):
     return db.query(models.Invoices.vendor_name).distinct().all()
+
+
+def get_vendor_total_count(vendor_name, month_year_string: str, db: Session):
+    return db.query(models.MonthlyCounts).filter(models.MonthlyCounts.vendor == vendor_name,  models.MonthlyCounts.month_year_string == "2023-02")
+
+
+def create_invoice_counts(db: Session, item: schemas.InvoicesCountsCreate):
+    db_item = models.InvoicesCounts(**item.dict())
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item

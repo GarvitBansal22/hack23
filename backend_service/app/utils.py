@@ -11,7 +11,7 @@ import zipfile
 
 from app.settings import SMTP_PORT, SMTP_SERVER
 from app.constants import EMAIL_CONTENT, TABLE_ROW_CONTENT, INVOICE_FILE_PATH, INVOICE_DETAILS_FILE_PATH
-from app.crud import create_user_item
+from app.crud import create_user_item, get_vendor_total_count, create_invoice_counts
 from . import schemas
 
 
@@ -161,3 +161,18 @@ def calculate_invoice_counts_and_month(invoice_pdf_file):
 
     count_of_transactions = int(count_of_transactions.replace(",", ""))
     return count_of_transactions, month
+
+
+def store_counts_in_db(vendor_name, month_year_string, count_invoice, db):
+    count_db = get_vendor_total_count(vendor_name, month_year_string, db)
+
+    item = {
+        "approver_stage": "Initial Stage",
+        "vendor_name": vendor_name,
+        "count_db": count_db,
+        "count_vendor": count_invoice
+    }
+
+    item = schemas.InvoicesCountsCreate(**item)
+    invoice_count = create_invoice_counts(db=db, item=item)
+

@@ -67,3 +67,9 @@ def list_invoices(skip: int = 0, limit: int = 100, vendor_name: Union[str, None]
 def list_invoices(db: Session = Depends(get_db)):
     vendors = crud.get_vendors(db)
     return vendors
+
+
+@app.get("/test-get", response_model=list[schemas.MonthlyCounts])
+def list_invoices(vendor_name: str, db: Session = Depends(get_db)):
+    vendors = crud.get_vendor_total_count(vendor_name, db)
+    return vendors
