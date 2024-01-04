@@ -103,3 +103,15 @@ async def send_email(subject, content):
     message.attach(part1)
 
     await aiosmtplib.send(message, hostname=SMTP_SERVER, port=SMTP_PORT)
+
+
+def calculate_excel_counts(base_path: str, file_names: list):
+    count_of_communication = 0
+    for file_name in file_names:
+        complete_file_path = str(Path(base_path) / Path(file_name))
+        df = pd.read_csv(complete_file_path)
+        # acoount_number = file_name.split("_")[0]
+        # summation_dict[acoount_number] = df['NUMBER MESSAGES'].sum()
+        count_of_communication += df['NUMBER MESSAGES'].sum()
+        del df
+    return count_of_communication
