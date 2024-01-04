@@ -125,7 +125,7 @@ def calculate_invoice_counts(invoice_pdf_file):
     pdf_reader = PyPDF2.PdfReader(invoice_pdf_file)
 
     number_of_pages = len(pdf_reader.pages)
-    count_of_transactions = list()
+    count_of_transactions = "0"
 
     for i in range(number_of_pages - 1):
         page_obj = pdf_reader.pages[i]
@@ -146,9 +146,10 @@ def calculate_invoice_counts(invoice_pdf_file):
             if flag == 1:
                 break
             if not text[0].isalpha():
-                count_of_transactions.append(text.strip().split()[3])
+                count_of_transactions = text.strip().split()[3]
+                flag = 1
             elif 'taxable amount' in text:
                 flag = 1
 
-    print(count_of_transactions)
+    count_of_transactions = int(count_of_transactions.replace(",", ""))
     return count_of_transactions
