@@ -25,6 +25,7 @@ async def parse_invoice_and_send_email(file, vendor_name, mode, db):
     else:
         # call method to save to db
         counts, month = calculate_invoice_counts_and_month(file.file)
+        store_counts_in_db(vendor_name, datetime.datetime.strptime(month.capitalize(), "%b-%y").strftime("%Y-%m"), counts, db)
         notify_pending_approval_in_slack(
             vendor_name, mode, datetime.datetime.strptime(month.capitalize(), "%b-%y").strftime("%Y-%m")
         )
@@ -170,7 +171,10 @@ def calculate_invoice_counts_and_month(invoice_pdf_file):
 
 def store_counts_in_db(vendor_name, month_year_string, count_invoice, db):
     count_db = get_vendor_total_count(vendor_name, month_year_string, db)
-
+    if not count_db:
+        count_db = 0
+    else:
+        count_db = count_db.message_count_monthly
     item = {
         "approver_stage": "Initial Stage",
         "vendor_name": vendor_name,

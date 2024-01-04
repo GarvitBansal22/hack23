@@ -26,7 +26,7 @@ def get_vendors(db: Session):
 
 
 def get_vendor_total_count(vendor_name, month_year_string: str, db: Session):
-    return db.query(models.MonthlyCounts).filter(models.MonthlyCounts.vendor == vendor_name,  models.MonthlyCounts.month_year_string == month_year_string)
+    return db.query(models.MonthlyCounts).filter(models.MonthlyCounts.vendor == vendor_name,  models.MonthlyCounts.month_year_string == month_year_string).first()
 
 
 def get_invoice_requests(vendor_name, month_year_string, db: Session):
