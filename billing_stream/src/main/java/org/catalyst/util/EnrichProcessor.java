@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 
 public class EnrichProcessor {
     public static void getPresentCount(JsonObject jsonObject, String module, Connection connection) throws IllegalArgumentException, SQLException {
-        String query = "SELECT * from monthly_counts";
+        String query = "SELECT * from saas_monthly";
         long dateEpoche = jsonObject.get(Constants.CREATED_MAPPING.get(module)).getAsLong();
         Instant instant = Instant.ofEpochMilli(dateEpoche/1000);
         LocalDateTime dateTime = LocalDateTime.ofInstant(instant, ZoneId.of("UTC"));
@@ -28,11 +28,11 @@ public class EnrichProcessor {
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query);
         if (resultSet.next()) {
-            String update_query = "UPDATE monthly_counts SET message_count_monthly = message_count_monthly + 1 where " + where;
-            statement.executeQuery(update_query);
+            String updateQuery = "UPDATE saas_monthly SET message_count_monthly = message_count_monthly + 1 where " + where;
+            statement.executeQuery(updateQuery);
         }
         else {
-            String insertQuery = "INSERT INTO monthly_counts (company_id, vendor, month_year_string, message_count_monthly) VALUES ('"+jsonObject.get("company_id").getAsString()+"', '"+jsonObject.get("vendor").getAsString()+"', '"+monthYearString+"', 1)";
+            String insertQuery = "INSERT INTO saas_monthly (company_id, vendor, month_year_string, message_count_monthly) VALUES ('"+jsonObject.get("company_id").getAsString()+"', '"+jsonObject.get("vendor").getAsString()+"', '"+monthYearString+"', 1)";
             statement.executeQuery(insertQuery);
         }
     }
