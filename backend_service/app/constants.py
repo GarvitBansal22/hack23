@@ -7,4 +7,7 @@ EMAIL_CONTENT = ("<html><body>Hello GupShup Team,<br><br>\n"
                  "Thanks and Regards,<br>"
                  "Credgenics Team</body></html>")
 TABLE_ROW_CONTENT = "<tr bgcolor=\"#ffffff\"><td>{account_number}</td></tr>\n"
-INVOICE_FILE_PATH = "/Users/abhinavsingh/Downloads/Invoices/"
+# INVOICE_FILE_PATH = "/Users/abhinavsingh/Downloads/Invoices/"
+# INVOICE_DETAILS_FILE_PATH = "/Users/abhinavsingh/Downloads/Invoices/Details"
+INVOICE_FILE_PATH = "/Users/avinash.tirkey/Downloads/Invoices/"
+INVOICE_DETAILS_FILE_PATH = "/Users/avinash.tirkey/Downloads/Invoices/Details/{invoice_id}"

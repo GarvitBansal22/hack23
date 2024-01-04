@@ -1,3 +1,5 @@
+import io
+
 import aiofiles
 import datetime
 import PyPDF2
@@ -5,9 +7,10 @@ import re
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import aiosmtplib
+import zipfile
 
 from app.settings import SMTP_PORT, SMTP_SERVER
-from app.constants import EMAIL_CONTENT, TABLE_ROW_CONTENT, INVOICE_FILE_PATH
+from app.constants import EMAIL_CONTENT, TABLE_ROW_CONTENT, INVOICE_FILE_PATH, INVOICE_DETAILS_FILE_PATH
 from app.crud import create_user_item
 from . import schemas
 
@@ -20,17 +23,25 @@ async def parse_invoice_and_send_email(file, vendor_name, mode, db):
         "mode": mode
     }
     item = schemas.InvoiceCreate(**item)
-    create_user_item(db=db, item=item)
+    invoice = create_user_item(db=db, item=item)
 
     if vendor_name == "gupshup" and mode == "whatsapp":
-        account_numbers, month = get_account_numbers_from_invoice(file.file)
-        await send_email("Gupshup account numbers 11", prepare_email_content(account_numbers, month))
+        account_numbers, month = get_account_numbers_and_month_from_invoice(file.file)
+        await send_email(f"Gupshup account numbers: {month}", prepare_email_content(account_numbers, month))
+
+    return invoice
+
+
+async def parse_invoice_detail_zip(invoice_id, file):
+    with zipfile.ZipFile(io.BytesIO(file.file.read()), "r") as zf:
+        file_name = zf.namelist()
+        zf.extractall(path=INVOICE_DETAILS_FILE_PATH.format(invoice_id=invoice_id))
 
 
 async def save_invoice_to_disk(file):
     file_name = file.filename.split(".")[0]
     file_extension = file.filename.split(".")[-1]
-    file_name = file_name + datetime.date.today().strftime("%Y-%m-%d") + file_extension
+    file_name = file_name + "_" + datetime.date.today().strftime("%Y-%m-%d") + "." + file_extension
     file_path = INVOICE_FILE_PATH + file_name
     async with aiofiles.open(file_path, mode='wb') as f:
         await f.write(file.file.read())
@@ -42,7 +53,7 @@ def prepare_email_content(account_numbers, allocation_month):
     return EMAIL_CONTENT.format(month=allocation_month, table_rows=table_rows)
 
 
-def get_account_numbers_from_invoice(pdf_file_obj):
+def get_account_numbers_and_month_from_invoice(pdf_file_obj):
     pdf_reader = PyPDF2.PdfReader(pdf_file_obj)
 
     number_of_pages = len(pdf_reader.pages)

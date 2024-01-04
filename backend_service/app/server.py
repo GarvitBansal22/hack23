@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi import FastAPI, UploadFile, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.utils import parse_invoice_and_send_email
+from app.utils import parse_invoice_and_send_email, parse_invoice_detail_zip
 
 from . import crud, models, schemas
 from .database import SessionLocal, engine
@@ -46,14 +46,18 @@ async def root():
 
 @app.post("/invoice/gupshup/whatsapp")
 async def upload_invoice(file: UploadFile, db: Session = Depends(get_db)):
-    await parse_invoice_and_send_email(file, "gupshup", "whatsapp", db)
+    return await parse_invoice_and_send_email(file, "gupshup", "whatsapp", db)
+
+
+@app.post("/invoice/{invoice_id}/details")
+async def upload_invoice_details(file: UploadFile, invoice_id: str):
+    await parse_invoice_detail_zip(invoice_id, file)
     return {"message": "email send"}
 
 
 @app.post("/invoice")
 async def upload_invoice(file: UploadFile, vendor_name: str, mode: str, db: Session = Depends(get_db)):
-    await parse_invoice_and_send_email(file, vendor_name, mode, db)
-    return {"message": "email send"}
+    return await parse_invoice_and_send_email(file, vendor_name, mode, db)
 
 
 @app.get("/invoice", response_model=list[schemas.Invoice])
