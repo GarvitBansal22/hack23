@@ -9,6 +9,10 @@ def get_items(db: Session, skip: int = 0, limit: int = 100, vendor_name=None):
     return db.query(models.Invoices).offset(skip).limit(limit).all()
 
 
+def get_invoice(db: Session, invoice_id):
+    return db.query(models.Invoices).filter(models.Invoices.id == invoice_id).first()
+
+
 def create_user_item(db: Session, item: schemas.InvoiceCreate):
     db_item = models.Invoices(**item.dict())
     db.add(db_item)

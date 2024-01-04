@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from fastapi import FastAPI, UploadFile, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.utils import parse_invoice_and_send_email, parse_invoice_detail_zip
+from app.utils import parse_invoice_and_send_email, parse_invoice_detail_zip, send_slack_message
 
 from . import crud, models, schemas
 from .database import SessionLocal, engine
@@ -73,3 +73,9 @@ def list_invoices(db: Session = Depends(get_db)):
 def list_invoices(vendor_name: str, db: Session = Depends(get_db)):
     vendors = crud.get_vendor_total_count(vendor_name, db)
     return vendors
+
+
+@app.get("/invoice/{invoice_id}/slack")
+def send_slack_message_invoices(invoice_id: str, db: Session = Depends(get_db)):
+    send_slack_message(invoice_id, db)
+    return {"message": "Message send"}

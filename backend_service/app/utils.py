@@ -9,10 +9,11 @@ from email.mime.multipart import MIMEMultipart
 import aiosmtplib
 import zipfile
 from slack_sdk import WebClient
+from sqlalchemy.orm import Session
 
 from app.settings import SMTP_PORT, SMTP_SERVER, SLACK_TOKEN, SLACK_CHANNEL
 from app.constants import EMAIL_CONTENT, TABLE_ROW_CONTENT, INVOICE_FILE_PATH, INVOICE_DETAILS_FILE_PATH, SLACK_MESSAGE
-from app.crud import create_user_item, get_vendor_total_count, create_invoice_counts
+from app.crud import create_user_item, get_vendor_total_count, create_invoice_counts, get_invoice
 from . import schemas
 
 
@@ -179,6 +180,11 @@ def store_counts_in_db(vendor_name, month_year_string, count_invoice, db):
 
     item = schemas.InvoicesCountsCreate(**item)
     invoice_count = create_invoice_counts(db=db, item=item)
+
+
+def send_slack_message(invoice_id: str, db: Session):
+    invoice = get_invoice(db, invoice_id)
+    notify_pending_approval_in_slack(invoice.vendor_name, invoice.mode, invoice.allocation_month)
 
 
 def notify_pending_approval_in_slack(vendor_name, mode, month):
