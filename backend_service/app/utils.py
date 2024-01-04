@@ -5,8 +5,8 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import aiosmtplib
 
-from backend_service.app.settings import SMTP_PORT, SMTP_SERVER
-from backend_service.app.constants import EMAIL_CONTENT, TABLE_ROW_CONTENT, INVOICE_FILE_PATH
+from app.settings import SMTP_PORT, SMTP_SERVER
+from app.constants import EMAIL_CONTENT, TABLE_ROW_CONTENT, INVOICE_FILE_PATH
 
 
 async def parse_invoice_and_send_email(file):
