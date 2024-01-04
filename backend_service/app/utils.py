@@ -1,4 +1,5 @@
 import aiofiles
+import datetime
 import PyPDF2
 import re
 from email.mime.text import MIMEText
@@ -7,18 +8,30 @@ import aiosmtplib
 
 from app.settings import SMTP_PORT, SMTP_SERVER
 from app.constants import EMAIL_CONTENT, TABLE_ROW_CONTENT, INVOICE_FILE_PATH
+from app.crud import create_user_item
+from . import schemas
 
 
-async def parse_invoice_and_send_email(file):
-    await save_invoice_to_disk(file)
+async def parse_invoice_and_send_email(file, vendor_name, mode, db):
+    file_name = await save_invoice_to_disk(file)
+    item = {
+        "file_name": file_name,
+        "vendor_name": vendor_name,
+        "mode": mode
+    }
+    item = schemas.InvoiceCreate(**item)
+    import pdb; pdb.set_trace();
+    create_user_item(db=db, item=item)
     account_numbers, month = get_account_numbers_from_invoice(file.file)
     await send_email("Gupshup account numbers 11", prepare_email_content(account_numbers, month))
 
 
 async def save_invoice_to_disk(file):
-    file_path = INVOICE_FILE_PATH + file.filename
+    file_name = file.filename + datetime.date.today().strftime("%Y-%m-%d") 
+    file_path = INVOICE_FILE_PATH + file_name
     async with aiofiles.open(file_path, mode='wb') as f:
         await f.write(file.file.read())
+    return file_name
 
 
 def prepare_email_content(account_numbers, allocation_month):
