@@ -15,3 +15,7 @@ def create_user_item(db: Session, item: schemas.InvoiceCreate):
     db.commit()
     db.refresh(db_item)
     return db_item
+
+
+def get_vendors(db: Session):
+    return db.query(models.Invoices.vendor_name).distinct().all()

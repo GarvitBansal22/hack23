@@ -61,3 +61,9 @@ async def upload_invoice(file: UploadFile, vendor_name: str, mode: str, db: Sess
 def list_invoices(skip: int = 0, limit: int = 100, vendor_name: Union[str, None] = None, db: Session = Depends(get_db)):
     items = crud.get_items(db, skip=skip, limit=limit, vendor_name=vendor_name)
     return items
+
+
+@app.get("/vendors/distinct", response_model=list[schemas.VendorDistinct])
+def list_invoices(db: Session = Depends(get_db)):
+    vendors = crud.get_vendors(db)
+    return vendors

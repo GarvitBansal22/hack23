@@ -16,3 +16,7 @@ class Invoice(InvoiceBase):
 
     class Config:
         orm_mode = True
+
+
+class VendorDistinct(BaseModel):
+    vendor_name: str
