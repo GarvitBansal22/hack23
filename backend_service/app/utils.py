@@ -8,9 +8,10 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import aiosmtplib
 import zipfile
+from slack_sdk import WebClient
 
-from app.settings import SMTP_PORT, SMTP_SERVER
-from app.constants import EMAIL_CONTENT, TABLE_ROW_CONTENT, INVOICE_FILE_PATH, INVOICE_DETAILS_FILE_PATH
+from app.settings import SMTP_PORT, SMTP_SERVER, SLACK_TOKEN, SLACK_CHANNEL
+from app.constants import EMAIL_CONTENT, TABLE_ROW_CONTENT, INVOICE_FILE_PATH, INVOICE_DETAILS_FILE_PATH, SLACK_MESSAGE
 from app.crud import create_user_item, get_vendor_total_count, create_invoice_counts
 from . import schemas
 
@@ -23,6 +24,9 @@ async def parse_invoice_and_send_email(file, vendor_name, mode, db):
     else:
         # call method to save to db
         counts, month = calculate_invoice_counts_and_month(file.file)
+        notify_pending_approval_in_slack(
+            vendor_name, mode, datetime.datetime.strptime(month.capitalize(), "%b-%y").strftime("%Y-%m")
+        )
 
     month = datetime.datetime.strptime(month.capitalize(), "%b-%y").strftime("%Y-%m")
     item = {
@@ -176,3 +180,14 @@ def store_counts_in_db(vendor_name, month_year_string, count_invoice, db):
     item = schemas.InvoicesCountsCreate(**item)
     invoice_count = create_invoice_counts(db=db, item=item)
 
+
+def notify_pending_approval_in_slack(vendor_name, mode, month):
+    message = SLACK_MESSAGE.format(
+        vendor_name=vendor_name, mode=mode,
+        month=datetime.datetime.strptime(month, "%Y-%m").strftime("%b, %y"))
+    send_notification_slack(message)
+
+
+def send_notification_slack(message_text):
+    client = WebClient(token=SLACK_TOKEN)
+    response = client.chat_postMessage(channel=SLACK_CHANNEL, text=message_text)

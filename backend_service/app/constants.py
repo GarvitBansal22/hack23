@@ -11,3 +11,5 @@ TABLE_ROW_CONTENT = "<tr bgcolor=\"#ffffff\"><td>{account_number}</td></tr>\n"
 # INVOICE_DETAILS_FILE_PATH = "/Users/abhinavsingh/Downloads/Invoices/Details"
 INVOICE_FILE_PATH = "/Users/avinash.tirkey/Downloads/Invoices/"
 INVOICE_DETAILS_FILE_PATH = "/Users/avinash.tirkey/Downloads/Invoices/Details/{invoice_id}"
+
+SLACK_MESSAGE = "Please approve the {vendor_name} {mode} invoice for the allocation month of {month}"
