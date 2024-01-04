@@ -1,3 +1,5 @@
+from typing import Union
+
 from sqlalchemy.orm import Session
 
 from fastapi import FastAPI, UploadFile, Request, Depends
@@ -44,11 +46,6 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.post("/invoice/gupshup/whatsapp")
-async def upload_invoice(file: UploadFile, db: Session = Depends(get_db)):
-    return await parse_invoice_and_send_email(file, "gupshup", "whatsapp", db)
-
-
 @app.post("/invoice/{invoice_id}/details")
 async def upload_invoice_details(file: UploadFile, invoice_id: str):
     await parse_invoice_detail_zip(invoice_id, file)
@@ -61,6 +58,6 @@ async def upload_invoice(file: UploadFile, vendor_name: str, mode: str, db: Sess
 
 
 @app.get("/invoice", response_model=list[schemas.Invoice])
-def list_invoices(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    items = crud.get_items(db, skip=skip, limit=limit)
+def list_invoices(skip: int = 0, limit: int = 100, vendor_name: Union[str, None] = None, db: Session = Depends(get_db)):
+    items = crud.get_items(db, skip=skip, limit=limit, vendor_name=vendor_name)
     return items

@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 from . import models, schemas
 
 
-def get_items(db: Session, skip: int = 0, limit: int = 100):
+def get_items(db: Session, skip: int = 0, limit: int = 100, vendor_name=None):
+    if vendor_name is not None:
+        return db.query(models.Invoices).filter(models.Invoices.vendor_name == vendor_name).offset(skip).limit(limit)
     return db.query(models.Invoices).offset(skip).limit(limit).all()
 
 
