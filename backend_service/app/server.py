@@ -10,8 +10,6 @@ from .database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 
-
-
 app = FastAPI()
 
 origins = [
@@ -31,6 +29,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Dependency
 def get_db():
     db = SessionLocal()
@@ -46,17 +45,18 @@ async def root():
 
 
 @app.post("/invoice/gupshup/whatsapp")
+async def upload_invoice(file: UploadFile, db: Session = Depends(get_db)):
+    await parse_invoice_and_send_email(file, "gupshup", "whatsapp", db)
+    return {"message": "email send"}
+
+
+@app.post("/invoice")
 async def upload_invoice(file: UploadFile, vendor_name: str, mode: str, db: Session = Depends(get_db)):
     await parse_invoice_and_send_email(file, vendor_name, mode, db)
     return {"message": "email send"}
 
 
-@app.post("/invoice")
-async def upload_invoice(file: UploadFile):
-    # await parse_invoice_and_send_email(file)
-    return {"message": "email send"}
-
 @app.get("/invoice", response_model=list[schemas.Invoice])
-def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def list_invoices(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     items = crud.get_items(db, skip=skip, limit=limit)
     return items
