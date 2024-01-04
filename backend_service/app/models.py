@@ -15,7 +15,7 @@ class Invoices(Base):
     file_name = Column(String)
     allocation_month = Column(String)
 
-    _invoice_count = relationship("InvoicesCounts", back_populates="_invoice")
+    invoice_count = relationship("InvoicesCounts", back_populates="invoice")
 
 
 class InvoicesCounts(Base):
@@ -29,7 +29,7 @@ class InvoicesCounts(Base):
     count_vendor = Column(Integer)
     created = Column(DateTime)
 
-    _invoice = relationship("Invoices", back_populates="_invoice_count")
+    invoice = relationship("Invoices", back_populates="invoice_count")
 
 
 class MonthlyCounts(Base):

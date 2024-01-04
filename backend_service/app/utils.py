@@ -12,8 +12,9 @@ from slack_sdk import WebClient
 from sqlalchemy.orm import Session
 
 from app.settings import SMTP_PORT, SMTP_SERVER, SLACK_TOKEN, SLACK_CHANNEL
-from app.constants import EMAIL_CONTENT, TABLE_ROW_CONTENT, INVOICE_FILE_PATH, INVOICE_DETAILS_FILE_PATH, SLACK_MESSAGE
-from app.crud import create_user_item, get_vendor_total_count, create_invoice_counts, get_invoice
+from app.constants import EMAIL_CONTENT, TABLE_ROW_CONTENT, INVOICE_FILE_PATH, INVOICE_DETAILS_FILE_PATH, SLACK_MESSAGE, \
+    APPROVAL_STAGES
+from app.crud import create_user_item, get_vendor_total_count, create_invoice_counts, get_invoice, update_invoice_counts
 from . import schemas
 
 
@@ -205,3 +206,15 @@ def notify_pending_approval_in_slack(vendor_name, mode, month):
 def send_notification_slack(message_text):
     client = WebClient(token=SLACK_TOKEN)
     response = client.chat_postMessage(channel=SLACK_CHANNEL, text=message_text)
+
+
+def approve_invoice(invoice_id, approved_by, db):
+    invoice = get_invoice(db, invoice_id)
+    invoice_count = invoice.invoice_count[0]
+    current_approval_state = invoice_count.approver_stage
+
+    if not approved_by == APPROVAL_STAGES[current_approval_state]["approver"]:
+        return False
+
+    invoice_count.approver_stage = APPROVAL_STAGES[current_approval_state]["next_stage"]
+    return update_invoice_counts(db, invoice_count)

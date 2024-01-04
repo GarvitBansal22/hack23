@@ -5,10 +5,11 @@ from sqlalchemy.orm import Session
 from fastapi import FastAPI, UploadFile, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.utils import parse_invoice_and_send_email, parse_invoice_detail_zip, send_slack_message
+from app.utils import parse_invoice_and_send_email, parse_invoice_detail_zip, send_slack_message, approve_invoice
 
 from . import crud, models, schemas
 from .database import SessionLocal, engine
+from .schemas import ApproveInvoice
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -79,3 +80,8 @@ def list_invoices_(vendor_name: Union[str, None] = None, month: Union[str, None]
 def send_slack_message_invoices(invoice_id: str, db: Session = Depends(get_db)):
     send_slack_message(invoice_id, db)
     return {"message": "Message send"}
+
+
+@app.post("/invoice/{invoice_id}/approve")
+async def approve_invoice_obj(invoice_id: str, data: ApproveInvoice, db: Session = Depends(get_db)):
+    return approve_invoice(invoice_id, data.approved_by, db)

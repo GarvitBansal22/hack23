@@ -13,3 +13,26 @@ INVOICE_FILE_PATH = "/Users/avinash.tirkey/Downloads/Invoices/"
 INVOICE_DETAILS_FILE_PATH = "/Users/avinash.tirkey/Downloads/Invoices/Details/{invoice_id}"
 
 SLACK_MESSAGE = "Please approve the {vendor_name} {mode} invoice for the allocation month of {month}"
+
+APPROVAL_STAGES = {
+    "Stage 0": {
+        "next_stage": "Stage 1",
+        "approver": "Approver 1"
+    },
+    "Stage 1": {
+        "next_stage": "Stage 2",
+        "approver": "Approver 2"
+    },
+    "Stage 2": {
+        "next_stage": "Stage 3",
+        "approver": "Approver 3"
+    },
+    "Stage 3": {
+        "next_stage": "Stage 4",
+        "approver": "Approver 4"
+    },
+    "Stage 4": {
+        "next_stage": "Stage 5",
+        "approver": "Approver 5"
+    }
+}

@@ -46,3 +46,10 @@ def create_invoice_counts(db: Session, item: schemas.InvoicesCountsCreate):
     db.commit()
     db.refresh(db_item)
     return db_item
+
+
+def update_invoice_counts(db: Session, invoice_count: models.InvoicesCounts):
+    db.add(invoice_count)
+    db.commit()
+    db.refresh(invoice_count)
+    return invoice_count

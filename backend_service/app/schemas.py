@@ -40,3 +40,8 @@ class InvoicesCountsBase(BaseModel):
 
 class InvoicesCountsCreate(InvoicesCountsBase):
     pass
+
+
+# Request models
+class ApproveInvoice(BaseModel):
+    approved_by: str
