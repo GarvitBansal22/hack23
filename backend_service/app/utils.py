@@ -17,20 +17,23 @@ from . import schemas
 
 async def parse_invoice_and_send_email(file, vendor_name, mode, db):
     file_name = await save_invoice_to_disk(file)
-    item = {
-        "file_name": file_name,
-        "vendor_name": vendor_name,
-        "mode": mode
-    }
-    item = schemas.InvoiceCreate(**item)
-    invoice = create_user_item(db=db, item=item)
-
     if vendor_name == "gupshup" and mode == "whatsapp":
         account_numbers, month = get_account_numbers_and_month_from_invoice(file.file)
         await send_email(f"Gupshup account numbers: {month}", prepare_email_content(account_numbers, month))
     else:
         # call method to save to db
-        counts = calculate_invoice_counts(file.file)
+        counts, month = calculate_invoice_counts_and_month(file.file)
+
+    month = datetime.datetime.strptime(month.capitalize(), "%b-%y").strftime("%Y-%m")
+    item = {
+        "file_name": file_name,
+        "vendor_name": vendor_name,
+        "mode": mode,
+        "allocation_month": month
+
+    }
+    item = schemas.InvoiceCreate(**item)
+    invoice = create_user_item(db=db, item=item)
 
     return invoice
 
@@ -121,11 +124,12 @@ def calculate_excel_counts(base_path: str, file_names: list):
     return count_of_communication
 
 
-def calculate_invoice_counts(invoice_pdf_file):
+def calculate_invoice_counts_and_month(invoice_pdf_file):
     pdf_reader = PyPDF2.PdfReader(invoice_pdf_file)
 
     number_of_pages = len(pdf_reader.pages)
     count_of_transactions = "0"
+    month = ""
 
     for i in range(number_of_pages - 1):
         page_obj = pdf_reader.pages[i]
@@ -135,6 +139,10 @@ def calculate_invoice_counts(invoice_pdf_file):
         index_account_key = -1
         for index_text, text in enumerate(page_text):
             text = text.strip().lower()
+
+            if re.search("^billing period.*$", text):
+                month = text.split(":")[1].strip().split()[1]
+
             if re.search("^account.*$", text):
                 index_account_key = index_text
                 break
@@ -152,4 +160,4 @@ def calculate_invoice_counts(invoice_pdf_file):
                 flag = 1
 
     count_of_transactions = int(count_of_transactions.replace(",", ""))
-    return count_of_transactions
+    return count_of_transactions, month

@@ -11,6 +11,7 @@ class Invoices(Base):
     vendor_name = Column(String)
     mode = Column(String)
     file_name = Column(String)
+    allocation_month = Column(String)
 
 
 class InvoicesCounts(Base):
