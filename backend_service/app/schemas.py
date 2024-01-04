@@ -32,7 +32,7 @@ class MonthlyCounts(BaseModel):
 
 
 class InvoicesCountsBase(BaseModel):
-    # invoice_id: int
+    invoice_id: int
     approver_stage: str
     count_db: int
     count_vendor: int

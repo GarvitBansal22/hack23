@@ -39,3 +39,4 @@ class MonthlyCounts(Base):
     vendor = Column(String, primary_key = True)
     month_year_string = Column(String, primary_key = True)
     message_count_monthly = Column(Integer)
+    mode = Column(String)

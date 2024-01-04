@@ -19,13 +19,13 @@ from . import schemas
 
 async def parse_invoice_and_send_email(file, vendor_name, mode, db):
     file_name = await save_invoice_to_disk(file)
+    counts = 0
     if vendor_name == "gupshup" and mode == "whatsapp":
         account_numbers, month = get_account_numbers_and_month_from_invoice(file.file)
         await send_email(f"Gupshup account numbers: {month}", prepare_email_content(account_numbers, month))
     else:
         # call method to save to db
         counts, month = calculate_invoice_counts_and_month(file.file)
-        store_counts_in_db(vendor_name, datetime.datetime.strptime(month.capitalize(), "%b-%y").strftime("%Y-%m"), counts, db)
         notify_pending_approval_in_slack(
             vendor_name, mode, datetime.datetime.strptime(month.capitalize(), "%b-%y").strftime("%Y-%m")
         )
@@ -40,6 +40,9 @@ async def parse_invoice_and_send_email(file, vendor_name, mode, db):
     }
     item = schemas.InvoiceCreate(**item)
     invoice = create_user_item(db=db, item=item)
+
+    if not(vendor_name == "gupshup" and mode == "whatsapp"):
+        store_counts_in_db(invoice.id, vendor_name, month, counts, mode, db)
 
     return invoice
 
@@ -169,8 +172,8 @@ def calculate_invoice_counts_and_month(invoice_pdf_file):
     return count_of_transactions, month
 
 
-def store_counts_in_db(vendor_name, month_year_string, count_invoice, db):
-    count_db = get_vendor_total_count(vendor_name, month_year_string, db)
+def store_counts_in_db(invoice_id, vendor_name, month_year_string, count_invoice, mode, db):
+    count_db = get_vendor_total_count(vendor_name, month_year_string, mode, db)
     if not count_db:
         count_db = 0
     else:
@@ -179,7 +182,8 @@ def store_counts_in_db(vendor_name, month_year_string, count_invoice, db):
         "approver_stage": "Initial Stage",
         "vendor_name": vendor_name,
         "count_db": count_db,
-        "count_vendor": count_invoice
+        "count_vendor": count_invoice,
+        "invoice_id": invoice_id
     }
 
     item = schemas.InvoicesCountsCreate(**item)
