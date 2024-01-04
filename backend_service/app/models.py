@@ -15,16 +15,21 @@ class Invoices(Base):
     file_name = Column(String)
     allocation_month = Column(String)
 
+    _invoice_count = relationship("InvoicesCounts", back_populates="_invoice")
+
 
 class InvoicesCounts(Base):
     __tablename__ = "invoice_counts"
 
     id = Column(Integer, primary_key=True, index=True)
+    invoice_id = Column(Integer, ForeignKey("invoices.id"))
     approver_stage = Column(String)
     last_notification_send = Column(DateTime)
     count_db = Column(Integer)
     count_vendor = Column(Integer)
     created = Column(DateTime)
+
+    _invoice = relationship("Invoices", back_populates="_invoice_count")
 
 
 class MonthlyCounts(Base):

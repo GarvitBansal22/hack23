@@ -69,9 +69,9 @@ def list_invoices(db: Session = Depends(get_db)):
     return vendors
 
 
-@app.get("/test-get", response_model=list[schemas.MonthlyCounts])
-def list_invoices(vendor_name: str, db: Session = Depends(get_db)):
-    vendors = crud.get_vendor_total_count(vendor_name, db)
+@app.get("/invoice-request")
+def list_invoices_(vendor_name: Union[str, None] = None, month: Union[str, None] = None, db: Session = Depends(get_db)):
+    vendors = crud.get_invoice_requests(vendor_name, month, db)
     return vendors
 
 

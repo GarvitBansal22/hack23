@@ -26,7 +26,18 @@ def get_vendors(db: Session):
 
 
 def get_vendor_total_count(vendor_name, month_year_string: str, db: Session):
-    return db.query(models.MonthlyCounts).filter(models.MonthlyCounts.vendor == vendor_name,  models.MonthlyCounts.month_year_string == "2023-02")
+    return db.query(models.MonthlyCounts).filter(models.MonthlyCounts.vendor == vendor_name,  models.MonthlyCounts.month_year_string == month_year_string)
+
+
+def get_invoice_requests(vendor_name, month_year_string, db: Session):
+    if vendor_name and month_year_string:
+        return db.query(models.InvoicesCounts).join(models.Invoices, models.Invoices.id == models.InvoicesCounts.invoice_id).filter(models.Invoices.vendor_name == vendor_name, models.Invoices.allocation_month == month_year_string)
+    if vendor_name:
+        return db.query(models.InvoicesCounts).join(models.Invoices, models.Invoices.id == models.InvoicesCounts.invoice_id).filter(models.Invoices.vendor_name == vendor_name)
+    if month_year_string:
+        return db.query(models.InvoicesCounts).join(models.Invoices, models.Invoices.id == models.InvoicesCounts.invoice_id).filter(models.Invoices.allocation_month == month_year_string)
+
+    return db.query(models.InvoicesCounts).join(models.Invoices,models.Invoices.id == models.InvoicesCounts.invoice_id).all()
 
 
 def create_invoice_counts(db: Session, item: schemas.InvoicesCountsCreate):
