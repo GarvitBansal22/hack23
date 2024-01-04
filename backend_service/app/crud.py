@@ -31,11 +31,11 @@ def get_vendor_total_count(vendor_name, month_year_string: str, db: Session):
 
 def get_invoice_requests(vendor_name, month_year_string, db: Session):
     if vendor_name and month_year_string:
-        return db.query(models.InvoicesCounts).join(models.Invoices, models.Invoices.id == models.InvoicesCounts.invoice_id).filter(models.Invoices.vendor_name == vendor_name, models.Invoices.allocation_month == month_year_string)
+        return db.query(models.InvoicesCounts).join(models.Invoices, models.Invoices.id == models.InvoicesCounts.invoice_id).filter(models.Invoices.vendor_name == vendor_name, models.Invoices.allocation_month == month_year_string).all()
     if vendor_name:
-        return db.query(models.InvoicesCounts).join(models.Invoices, models.Invoices.id == models.InvoicesCounts.invoice_id).filter(models.Invoices.vendor_name == vendor_name)
+        return db.query(models.InvoicesCounts).join(models.Invoices, models.Invoices.id == models.InvoicesCounts.invoice_id).filter(models.Invoices.vendor_name == vendor_name).all()
     if month_year_string:
-        return db.query(models.InvoicesCounts).join(models.Invoices, models.Invoices.id == models.InvoicesCounts.invoice_id).filter(models.Invoices.allocation_month == month_year_string)
+        return db.query(models.InvoicesCounts).join(models.Invoices, models.Invoices.id == models.InvoicesCounts.invoice_id).filter(models.Invoices.allocation_month == month_year_string).all()
 
     return db.query(models.InvoicesCounts).join(models.Invoices,models.Invoices.id == models.InvoicesCounts.invoice_id).all()
 
