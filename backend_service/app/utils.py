@@ -1,3 +1,4 @@
+import aiofiles
 import PyPDF2
 import re
 from email.mime.text import MIMEText
@@ -5,12 +6,19 @@ from email.mime.multipart import MIMEMultipart
 import aiosmtplib
 
 from backend_service.app.settings import SMTP_PORT, SMTP_SERVER
-from backend_service.app.constants import EMAIL_CONTENT, TABLE_ROW_CONTENT
+from backend_service.app.constants import EMAIL_CONTENT, TABLE_ROW_CONTENT, INVOICE_FILE_PATH
 
 
 async def parse_invoice_and_send_email(file):
+    await save_invoice_to_disk(file)
     account_numbers, month = get_account_numbers_from_invoice(file.file)
     await send_email("Gupshup account numbers 11", prepare_email_content(account_numbers, month))
+
+
+async def save_invoice_to_disk(file):
+    file_path = INVOICE_FILE_PATH + file.filename
+    async with aiofiles.open(file_path, mode='wb') as f:
+        await f.write(file.file.read())
 
 
 def prepare_email_content(account_numbers, allocation_month):
