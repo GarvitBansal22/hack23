@@ -8,14 +8,14 @@ from backend_service.app.settings import SMTP_PORT, SMTP_SERVER
 from backend_service.app.constants import EMAIL_CONTENT, TABLE_ROW_CONTENT
 
 
-async def parse_invoice_and_send_email(pdf_file_obj):
-    account_numbers = get_account_numbers_from_invoice(pdf_file_obj)
-    await send_email("Gupshup account numbers 9", prepare_email_content(account_numbers))
+async def parse_invoice_and_send_email(file):
+    account_numbers, month = get_account_numbers_from_invoice(file.file)
+    await send_email("Gupshup account numbers 11", prepare_email_content(account_numbers, month))
 
 
-def prepare_email_content(account_numbers):
+def prepare_email_content(account_numbers, allocation_month):
     table_rows = "".join([TABLE_ROW_CONTENT.format(account_number=account_number) for account_number in account_numbers])
-    return EMAIL_CONTENT.format(month="Temp", table_rows=table_rows)
+    return EMAIL_CONTENT.format(month=allocation_month, table_rows=table_rows)
 
 
 def get_account_numbers_from_invoice(pdf_file_obj):
@@ -24,6 +24,7 @@ def get_account_numbers_from_invoice(pdf_file_obj):
     number_of_pages = len(pdf_reader.pages)
 
     account_numbers = list()
+    month = ""
 
     for i in range(number_of_pages-1):
         page_obj = pdf_reader.pages[i]
@@ -33,6 +34,8 @@ def get_account_numbers_from_invoice(pdf_file_obj):
         index_account_key = -1
         for index_text, text in enumerate(page_text):
             text = text.strip().lower()
+            if re.search("^billing period.*$", text):
+                month = text.split(":")[1].strip().split()[1]
             if re.search("^account.*$", text):
                 index_account_key = index_text
                 break
@@ -52,7 +55,7 @@ def get_account_numbers_from_invoice(pdf_file_obj):
 
         # print(pageText)
     account_numbers = list(set(account_numbers))
-    return account_numbers
+    return account_numbers, month
 
 
 async def send_email(subject, content):

@@ -12,5 +12,5 @@ async def root():
 
 @app.post("/uploadInvoice/")
 async def upload_invoice(file: UploadFile):
-    await parse_invoice_and_send_email(file.file)
+    await parse_invoice_and_send_email(file)
     return {"message": "email send"}
