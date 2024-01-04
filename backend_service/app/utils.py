@@ -20,7 +20,6 @@ async def parse_invoice_and_send_email(file, vendor_name, mode, db):
         "mode": mode
     }
     item = schemas.InvoiceCreate(**item)
-    import pdb; pdb.set_trace();
     create_user_item(db=db, item=item)
     account_numbers, month = get_account_numbers_from_invoice(file.file)
     await send_email("Gupshup account numbers 11", prepare_email_content(account_numbers, month))

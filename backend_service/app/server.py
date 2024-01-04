@@ -56,7 +56,7 @@ async def upload_invoice(file: UploadFile):
     # await parse_invoice_and_send_email(file)
     return {"message": "email send"}
 
-@app.get("/get-invoices", response_model=list[schemas.Invoice])
+@app.get("/invoice", response_model=list[schemas.Invoice])
 def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     items = crud.get_items(db, skip=skip, limit=limit)
     return items
