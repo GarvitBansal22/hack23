@@ -35,7 +35,8 @@ async def parse_invoice_and_send_email(file, vendor_name, mode, db):
 async def parse_invoice_detail_zip(invoice_id, file):
     with zipfile.ZipFile(io.BytesIO(file.file.read()), "r") as zf:
         file_name = zf.namelist()
-        zf.extractall(path=INVOICE_DETAILS_FILE_PATH.format(invoice_id=invoice_id))
+        base_path = INVOICE_DETAILS_FILE_PATH.format(invoice_id=invoice_id)
+        zf.extractall(path=base_path)
 
 
 async def save_invoice_to_disk(file):
