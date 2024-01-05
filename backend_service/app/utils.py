@@ -14,7 +14,8 @@ from sqlalchemy.orm import Session
 from app.settings import SMTP_PORT, SMTP_SERVER, SLACK_TOKEN, SLACK_CHANNEL
 from app.constants import EMAIL_CONTENT, TABLE_ROW_CONTENT, INVOICE_FILE_PATH, INVOICE_DETAILS_FILE_PATH, SLACK_MESSAGE, \
     APPROVAL_STAGES
-from app.crud import create_user_item, get_vendor_total_count, create_invoice_counts, get_invoice, update_invoice_counts
+from app.crud import create_user_item, get_vendor_total_count, create_invoice_counts, get_invoice, \
+    update_invoice_counts, get_caas_billing_config
 from . import schemas
 
 
@@ -219,3 +220,37 @@ def approve_invoice(invoice_id, approved_by, db):
 
     invoice_count.approver_stage = APPROVAL_STAGES[current_approval_state]["next_stage"]
     return update_invoice_counts(db, invoice_count)
+
+
+###########
+# Billing #
+###########
+def calculate_company_caas_bill_amount(
+        company_id: str,
+        dpd_range: str,
+        allocated_case: int,
+        recovered_cases: int,
+        recovered_amount: int,
+        db: Session
+):
+    recover_percent = (recovered_cases/allocated_case) * 100
+    config = get_caas_billing_config(db, company_id, dpd_range, recover_percent)
+
+    amount = 0
+    if config is None:
+        return amount
+    if config.billing_type == "PERCENT":
+        amount = calculate_percent_bill_amount(recovered_amount, config.fee_value)
+    elif config.billing_type == "PER_AMOUNT":
+        amount = calculate_per_account_bill_amount(recovered_cases, config.fee_value)
+    return amount
+
+
+def calculate_percent_bill_amount(amount, fee_percent):
+    return (amount * fee_percent) / 100
+
+
+def calculate_per_account_bill_amount(loan_account_number, fee_per_account):
+    return loan_account_number * fee_per_account
+
+

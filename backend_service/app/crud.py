@@ -58,3 +58,10 @@ def update_invoice_counts(db: Session, invoice_count: models.InvoicesCounts):
     db.commit()
     db.refresh(invoice_count)
     return invoice_count
+
+
+def get_caas_billing_config(db: Session, company_id, dpd_range, recovery_percent):
+    return db.query(models.CaasBillingConfig).filter(
+        models.CaasBillingConfig.company_id == company_id, models.CaasBillingConfig.dpd_range == dpd_range,
+        models.CaasBillingConfig.recovery_percent_start <= recovery_percent,
+        models.CaasBillingConfig.recovery_percent_end >= recovery_percent).first()

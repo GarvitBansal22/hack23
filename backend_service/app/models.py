@@ -1,6 +1,6 @@
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, INT4RANGE
 import uuid
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Float
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -40,3 +40,15 @@ class MonthlyCounts(Base):
     month_year_string = Column(String, primary_key = True)
     message_count_monthly = Column(Integer)
     mode = Column(String)
+
+
+class CaasBillingConfig(Base):
+    __tablename__ = "caas_billing_config"
+
+    id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(UUID(as_uuid=True), default=uuid.uuid4)
+    dpd_range = Column(String, nullable=False)
+    recovery_percent_start = Column(Integer, nullable=False)
+    recovery_percent_end = Column(Integer, nullable=False)
+    billing_type = Column(String, nullable=False)
+    fee_value = Column(Float, nullable=False)
