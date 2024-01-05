@@ -22,17 +22,5 @@ APPROVAL_STAGES = {
     "Stage 1": {
         "next_stage": "Stage 2",
         "approver": "Approver 2"
-    },
-    "Stage 2": {
-        "next_stage": "Stage 3",
-        "approver": "Approver 3"
-    },
-    "Stage 3": {
-        "next_stage": "Stage 4",
-        "approver": "Approver 4"
-    },
-    "Stage 4": {
-        "next_stage": "Stage 5",
-        "approver": "Approver 5"
     }
 }

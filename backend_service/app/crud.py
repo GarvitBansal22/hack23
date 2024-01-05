@@ -31,9 +31,9 @@ def get_vendor_total_count(vendor_name, month_year_string: str, mode, db: Sessio
 
 def get_invoice_requests(vendor_name, month_year_string, is_completed, db: Session):
     if is_completed.lower() in ["false", "0"]:
-        stages = ("Stage 0", "Stage 1", "Stage 2", "Stage 3", "Stage 4")
+        stages = ("Stage 0", "Stage 1")
     else:
-        stages = ("Stage 5",)
+        stages = ("Stage 2",)
 
     if vendor_name and month_year_string:
         return db.query(models.InvoicesCounts).join(models.Invoices, models.Invoices.id == models.InvoicesCounts.invoice_id).filter(models.Invoices.vendor_name == vendor_name, models.Invoices.allocation_month == month_year_string, models.InvoicesCounts.approver_stage.in_(stages)).all()
