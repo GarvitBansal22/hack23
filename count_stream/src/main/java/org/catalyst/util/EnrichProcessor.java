@@ -32,7 +32,7 @@ public class EnrichProcessor {
             statement.executeQuery(update_query);
         }
         else {
-            String insertQuery = "INSERT INTO monthly_counts (company_id, vendor, month_year_string, message_count_monthly) VALUES ('"+jsonObject.get("company_id").getAsString()+"', '"+jsonObject.get("vendor").getAsString()+"', '"+monthYearString+"', 1)";
+            String insertQuery = "INSERT INTO monthly_counts (company_id, vendor, month_year_string, message_count_monthly, mode) VALUES ('"+jsonObject.get("company_id").getAsString()+"', '"+jsonObject.get("vendor").getAsString()+"', '"+monthYearString+"', 1, '"+module+"')";
             statement.executeQuery(insertQuery);
         }
     }
