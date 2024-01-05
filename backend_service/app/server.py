@@ -49,8 +49,8 @@ async def root():
 
 
 @app.post("/invoice/{invoice_id}/details")
-async def upload_invoice_details(file: UploadFile, invoice_id: str):
-    await parse_invoice_detail_zip(invoice_id, file)
+async def upload_invoice_details(file: UploadFile, invoice_id: str, db: Session = Depends(get_db)):
+    await parse_invoice_detail_zip(invoice_id, file, db)
     return {"message": "email send"}
 
 

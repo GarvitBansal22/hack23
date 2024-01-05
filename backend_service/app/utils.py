@@ -1,9 +1,11 @@
 import io
+from pathlib import Path
 
 import aiofiles
 import datetime
 import PyPDF2
 import re
+import pandas as pd
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import aiosmtplib
@@ -47,12 +49,14 @@ async def parse_invoice_and_send_email(file, vendor_name, mode, db):
     return invoice
 
 
-async def parse_invoice_detail_zip(invoice_id, file):
+async def parse_invoice_detail_zip(invoice_id, file, db):
     with zipfile.ZipFile(io.BytesIO(file.file.read()), "r") as zf:
+        invoice = get_invoice(db, invoice_id)
         file_names = zf.namelist()
         base_path = INVOICE_DETAILS_FILE_PATH.format(invoice_id=invoice_id)
         zf.extractall(path=base_path)
         counts = calculate_excel_counts(base_path, file_names)
+        store_counts_in_db(invoice.id, invoice.vendor_name, invoice.allocation_month, counts, invoice.mode, db)
 
 
 async def save_invoice_to_disk(file):
