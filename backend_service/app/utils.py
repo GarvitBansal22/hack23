@@ -247,7 +247,15 @@ def calculate_company_caas_bill_amount(
         amount = calculate_percent_bill_amount(recovered_amount, config.fee_value)
     elif config.billing_type == "PER_AMOUNT":
         amount = calculate_per_account_bill_amount(recovered_cases, config.fee_value)
-    return amount
+    return {
+        "amount": amount
+    }
+
+
+def calculate_company_saas_bill_amount():
+    return {
+        "amount": 14598
+    }
 
 
 def calculate_percent_bill_amount(amount, fee_percent):

@@ -6,7 +6,7 @@ from fastapi import FastAPI, UploadFile, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.utils import parse_invoice_and_send_email, parse_invoice_detail_zip, send_slack_message, approve_invoice, \
-    calculate_company_caas_bill_amount
+    calculate_company_caas_bill_amount, calculate_company_saas_bill_amount
 
 from . import crud, models, schemas
 from .database import SessionLocal, engine
@@ -88,8 +88,13 @@ async def approve_invoice_obj(invoice_id: str, data: ApproveInvoice, db: Session
     return approve_invoice(invoice_id, data.approved_by, db)
 
 
-@app.get("/generate-bills")
-async def test_generate_bill(company_id: str, dpd_range: str, allocated_loans: int, recovered_loans: int,
+@app.get("/caas/generate-bills")
+async def generate_caas_bill(company_id: str, dpd_range: str, allocated_loans: int, recovered_loans: int,
                              amount_recovered: int, db: Session = Depends(get_db)):
     return calculate_company_caas_bill_amount(company_id, dpd_range, allocated_loans, recovered_loans,
                                               amount_recovered, db)
+
+
+@app.get("/saas/generate-bills")
+async def generate_saas_bill(company_id: str, db: Session = Depends(get_db)):
+    return calculate_company_saas_bill_amount()
