@@ -194,6 +194,9 @@ def store_counts_in_db(invoice_id, vendor_name, month_year_string, count_invoice
 def send_slack_message(invoice_id: str, db: Session):
     invoice = get_invoice(db, invoice_id)
     notify_pending_approval_in_slack(invoice.vendor_name, invoice.mode, invoice.allocation_month)
+    invoice_count = invoice.invoice_count[0]
+    invoice_count.last_notification_send = datetime.now()
+    return update_invoice_counts(db, invoice_count)
 
 
 def notify_pending_approval_in_slack(vendor_name, mode, month):
