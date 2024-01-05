@@ -29,15 +29,20 @@ def get_vendor_total_count(vendor_name, month_year_string: str, mode, db: Sessio
     return db.query(models.MonthlyCounts).filter(models.MonthlyCounts.vendor == vendor_name,  models.MonthlyCounts.month_year_string == month_year_string, models.MonthlyCounts.mode == mode).first()
 
 
-def get_invoice_requests(vendor_name, month_year_string, db: Session):
-    if vendor_name and month_year_string:
-        return db.query(models.InvoicesCounts).join(models.Invoices, models.Invoices.id == models.InvoicesCounts.invoice_id).filter(models.Invoices.vendor_name == vendor_name, models.Invoices.allocation_month == month_year_string).all()
-    if vendor_name:
-        return db.query(models.InvoicesCounts).join(models.Invoices, models.Invoices.id == models.InvoicesCounts.invoice_id).filter(models.Invoices.vendor_name == vendor_name).all()
-    if month_year_string:
-        return db.query(models.InvoicesCounts).join(models.Invoices, models.Invoices.id == models.InvoicesCounts.invoice_id).filter(models.Invoices.allocation_month == month_year_string).all()
+def get_invoice_requests(vendor_name, month_year_string, is_completed, db: Session):
+    if is_completed.lower() in ["false", "0"]:
+        stages = ("Stage 0", "Stage 1", "Stage 2", "Stage 3", "Stage 4")
+    else:
+        stages = ("Stage 5",)
 
-    return db.query(models.InvoicesCounts).join(models.Invoices,models.Invoices.id == models.InvoicesCounts.invoice_id).all()
+    if vendor_name and month_year_string:
+        return db.query(models.InvoicesCounts).join(models.Invoices, models.Invoices.id == models.InvoicesCounts.invoice_id).filter(models.Invoices.vendor_name == vendor_name, models.Invoices.allocation_month == month_year_string, models.InvoicesCounts.approver_stage.in_(stages)).all()
+    if vendor_name:
+        return db.query(models.InvoicesCounts).join(models.Invoices, models.Invoices.id == models.InvoicesCounts.invoice_id).filter(models.Invoices.vendor_name == vendor_name, models.InvoicesCounts.approver_stage.in_(stages)).all()
+    if month_year_string:
+        return db.query(models.InvoicesCounts).join(models.Invoices, models.Invoices.id == models.InvoicesCounts.invoice_id).filter(models.Invoices.allocation_month == month_year_string, models.InvoicesCounts.approver_stage.in_(stages)).all()
+
+    return db.query(models.InvoicesCounts).join(models.Invoices,models.Invoices.id == models.InvoicesCounts.invoice_id).filter(models.InvoicesCounts.approver_stage.in_(stages)).all()
 
 
 def create_invoice_counts(db: Session, item: schemas.InvoicesCountsCreate):

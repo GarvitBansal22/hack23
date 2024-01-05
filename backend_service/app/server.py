@@ -71,8 +71,8 @@ def list_invoices(db: Session = Depends(get_db)):
 
 
 @app.get("/invoice-request")
-def list_invoices_(vendor_name: Union[str, None] = None, month: Union[str, None] = None, db: Session = Depends(get_db)):
-    vendors = crud.get_invoice_requests(vendor_name, month, db)
+def list_invoices_(vendor_name: Union[str, None] = None, month: Union[str, None] = None, is_completed: str = "false", db: Session = Depends(get_db)):
+    vendors = crud.get_invoice_requests(vendor_name, month, is_completed, db)
     return vendors
 
 
